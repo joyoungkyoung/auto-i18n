@@ -1,0 +1,20 @@
+{
+	"name": "i18n-management",
+	"version": "0.1.0",
+	"private": true,
+	"dependencies": {
+		"dotenv": "^16.0.1",
+		"i18next": "^21.9.1",
+		"mkdirp": "^1.0.4"
+	},
+	"scripts": {
+		"scan:i18n": "i18next-scanner --config i18next-scanner.config.js",
+		"upload:i18n": "npm run scan:i18n && node translate/upload.js",
+		"download:i18n": "node translate/download.js",
+		"serve": "npm run download:i18n && vue-cli-service serve"
+	},
+	"devDependencies": {
+		"google-spreadsheet": "^3.3.0",
+		"i18next-scanner": "^4.0.0"
+	}
+}
