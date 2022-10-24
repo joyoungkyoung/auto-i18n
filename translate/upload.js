@@ -1,5 +1,5 @@
 // place in translate/upload.js
-const fs = require('fs');
+const fs = require("fs");
 const {
   loadSpreadsheet,
   localesPath,
@@ -9,9 +9,9 @@ const {
   sheetId,
   columnKeyToHeader,
   NOT_AVAILABLE_CELL,
-} = require('../index');
+} = require("../index");
 
-const headerValues = ['키', '한글', '영어', '일본어', '중국어'];
+const headerValues = ["키", "한글", "영어", "베트남어"];
 
 async function addNewSheet(doc, title, sheetId) {
   const sheet = await doc.addSheet({
@@ -111,7 +111,7 @@ async function updateSheetFromJson() {
       const localeJsonFilePath = `${localesPath}/${lng}/${ns}.json`;
 
       // eslint-disable-next-line no-sync
-      const json = fs.readFileSync(localeJsonFilePath, 'utf8');
+      const json = fs.readFileSync(localeJsonFilePath, "utf8");
 
       gatherKeyMap(keyMap, lng, JSON.parse(json));
     });

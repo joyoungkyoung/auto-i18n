@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"dependencies": {
-		"dotenv": "^16.0.1",
+		"dotenv": "^16.0.3",
 		"i18next": "^21.9.1",
 		"mkdirp": "^1.0.4"
 	},
