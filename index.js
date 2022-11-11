@@ -1,4 +1,5 @@
 require("dotenv").config();
+const path = require('path')
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 // const {
 //   spreadSheetDocId,
@@ -19,8 +20,7 @@ async function loadSpreadsheet(_config) {
   const {
     spreadSheetDocId,
     sheetId,
-    clientEmail,
-    privateKey
+    credentials
   } = _config;
 
   console.info(
@@ -34,7 +34,7 @@ async function loadSpreadsheet(_config) {
     "\u001B[0m"
   );
 
-  const creds = require('./.credentials/toastcanvas-a4c2e5fb4c15.json')
+  const creds = require(path.join(process.cwd(), credentials))
   // spreadsheet key is the long id in the sheets URL
   const doc = new GoogleSpreadsheet(spreadSheetDocId);
 

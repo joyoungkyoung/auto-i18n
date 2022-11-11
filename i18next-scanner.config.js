@@ -23,11 +23,11 @@ module.exports = {
     },
     resource: {
       loadPath: path.join(
-        __dirname,
+        process.cwd(),
         resource.loadPath + "/{{lng}}/{{ns}}.json"
       ),
       savePath: path.join(
-        __dirname,
+        process.cwd(),
         resource.savePath + "/{{lng}}/{{ns}}.json"
       ),
     },

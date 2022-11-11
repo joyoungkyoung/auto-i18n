@@ -1,11 +1,12 @@
 const fs = require("fs");
-const {
-  getLanguages,
-  getLanguageColumns,
-  fileName,
-  resource,
-  sheetId,
-} = require("../config");
+const path = require('path')
+// const {
+//   getLanguages,
+//   getLanguageColumns,
+//   fileName,
+//   resource,
+//   sheetId,
+// } = require("../config");
 const {
   loadSpreadsheet,
   getPureKey,
@@ -13,9 +14,11 @@ const {
   getColumnKeyToHeader,
 } = require("../index");
 
-const headerValues = ["키", ...getLanguageColumns()];
 
-async function addNewSheet(doc, title, sheetId) {
+
+async function addNewSheet(doc, title, _config) {
+  const {sheetId, getLanguageColumns} = _config;
+  const headerValues = ["키", ...getLanguageColumns()];
   const sheet = await doc.addSheet({
     sheetId,
     title,
@@ -30,14 +33,15 @@ async function addNewSheet(doc, title, sheetId) {
  * @param {*} doc 스프레드 시트 객체
  * @param {*} keyMap json파일 키맵
  */
-async function updateTranslationsFromKeyMapToSheet(doc, keyMap) {
+async function updateTranslationsFromKeyMapToSheet(doc, keyMap, _config) {
+  const {sheetId} = _config;
   const title = `i18n`; // 스프레드 시트 내 시트명
   let sheet = doc.sheetsById[sheetId];
   if (!sheet) {
-    sheet = await addNewSheet(doc, title, sheetId);
+    sheet = await addNewSheet(doc, title, _config);
   }
 
-  const columnKeyToHeader = getColumnKeyToHeader(); // 헤더별 컬럼정보
+  const columnKeyToHeader = getColumnKeyToHeader(_config); // 헤더별 컬럼정보
   const existKeys = {}; // 기존에 업로드 된 데이터
   const addedRows = []; // 신규 추가할 데이터
 
@@ -85,7 +89,7 @@ function toJson(keyMap) {
   return json;
 }
 
-function gatherKeyMap(keyMap, lng, json) {
+function gatherKeyMap(keyMap, lng, json, languages) {
   for (const [keyWithPostfix, translated] of Object.entries(json)) {
     const key = getPureKey(keyWithPostfix);
 
@@ -95,7 +99,7 @@ function gatherKeyMap(keyMap, lng, json) {
 
     const keyMapWithLng = keyMap[key];
     if (!keyMapWithLng[keyWithPostfix]) {
-      keyMapWithLng[keyWithPostfix] = getLanguages().reduce((initObj, lng) => {
+      keyMapWithLng[keyWithPostfix] = languages.reduce((initObj, lng) => {
         initObj[lng] = NOT_AVAILABLE_CELL;
 
         return initObj;
@@ -106,28 +110,30 @@ function gatherKeyMap(keyMap, lng, json) {
   }
 }
 
-async function updateSheetFromJson() {
-  const doc = await loadSpreadsheet();
-
+exports.updateSheetFromJson = async (_config) => {
+  const {resource, fileName, getLanguages, sheetId} = _config
+  const doc = await loadSpreadsheet(_config);
+  const loadPath = path.join(process.cwd(), resource.loadPath)
   // 파일 목록 불러오기
-  fs.readdir(resource.loadPath, (error, dirNames) => {
+  fs.readdir(loadPath, (error, dirNames) => {
     if (error) {
       throw error;
     }
 
     const keyMap = {};
 
+   
     dirNames.forEach((lng) => {
-      const localeJsonFilePath = `${resource.loadPath}/${lng}/${fileName}.json`;
+      const localeJsonFilePath = `${loadPath}/${lng}/${fileName}.json`;
 
       const json = fs.readFileSync(localeJsonFilePath, "utf8");
 
-      gatherKeyMap(keyMap, lng, JSON.parse(json));
+      gatherKeyMap(keyMap, lng, JSON.parse(json), getLanguages());
     });
 
-    updateTranslationsFromKeyMapToSheet(doc, toJson(keyMap));
+    updateTranslationsFromKeyMapToSheet(doc, toJson(keyMap), _config);
   });
 }
 
 // run
-updateSheetFromJson();
+// updateSheetFromJson();

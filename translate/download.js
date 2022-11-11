@@ -75,14 +75,15 @@ function checkAndMakeLocaleDir(dirPath, subDirs) {
 }
 
 exports.updateJsonFromSheet = async (_config) => {
-  const {resource, fileName, getLanguages, sheetId} = _config
+  const {resource, fileName, getLanguages} = _config
+  const loadPath = path.join(process.cwd(), resource.loadPath)
   const languages = getLanguages();
-  await checkAndMakeLocaleDir(resource.loadPath, languages);
+
+  await checkAndMakeLocaleDir(loadPath, languages);
 
   const doc = await loadSpreadsheet(_config);
   const lngsMap = await fetchTranslationsFromSheetToJson(doc, _config);
 
-  const loadPath = path.join(process.cwd(), resource.loadPath)
   fs.readdir(loadPath, (error, dirNames) => {
     if (error) {
       throw error;
