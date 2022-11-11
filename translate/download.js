@@ -1,7 +1,7 @@
-// place in translate/download.js
 const fs = require("fs");
+const path = require("path");
 const mkdirp = require("mkdirp");
-const { resource, fileName, getLanguages, sheetId } = require("../config");
+// const { resource, fileName, getLanguages, sheetId } = require("../config");
 const {
   loadSpreadsheet,
   NOT_AVAILABLE_CELL,
@@ -27,13 +27,14 @@ const {
  *   },
  * }
  */
-async function fetchTranslationsFromSheetToJson(doc) {
+async function fetchTranslationsFromSheetToJson(doc, _config) {
+  const {getLanguages, sheetId} = _config;
   const sheet = doc.sheetsById[sheetId];
   if (!sheet) {
     return {};
   }
 
-  const columnKeyToHeader = getColumnKeyToHeader(); // 헤더별 컬럼정보
+  const columnKeyToHeader = getColumnKeyToHeader(_config); // 헤더별 컬럼정보
   const lngsMap = {};
   const rows = await sheet.getRows();
 
@@ -73,19 +74,22 @@ function checkAndMakeLocaleDir(dirPath, subDirs) {
   });
 }
 
-async function updateJsonFromSheet() {
-  await checkAndMakeLocaleDir(resource.loadPath, getLanguages());
+exports.updateJsonFromSheet = async (_config) => {
+  const {resource, fileName, getLanguages, sheetId} = _config
+  const languages = getLanguages();
+  await checkAndMakeLocaleDir(resource.loadPath, languages);
 
-  const doc = await loadSpreadsheet();
-  const lngsMap = await fetchTranslationsFromSheetToJson(doc);
+  const doc = await loadSpreadsheet(_config);
+  const lngsMap = await fetchTranslationsFromSheetToJson(doc, _config);
 
-  fs.readdir(resource.loadPath, (error, dirNames) => {
+  const loadPath = path.join(process.cwd(), resource.loadPath)
+  fs.readdir(loadPath, (error, dirNames) => {
     if (error) {
       throw error;
     }
 
     dirNames.forEach((lng) => {
-      const localeJsonFilePath = `${resource.loadPath}/${lng}/${fileName}.json`;
+      const localeJsonFilePath = `${loadPath}/${lng}/${fileName}.json`;
 
       const jsonString = JSON.stringify(lngsMap[lng], null, 2);
 
@@ -99,4 +103,4 @@ async function updateJsonFromSheet() {
 }
 
 // run
-updateJsonFromSheet();
+// updateJsonFromSheet();

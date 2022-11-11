@@ -1,23 +1,28 @@
-// place in translate/index.js
 require("dotenv").config();
 const { GoogleSpreadsheet } = require("google-spreadsheet");
-const {
-  spreadSheetDocId,
-  sheetId,
-  credentials,
-  getLanguageColumns,
-  getLanguages,
-} = require("./config");
+// const {
+//   spreadSheetDocId,
+//   sheetId,
+//   getLanguageColumns,
+//   getLanguages,
+//   clientEmail,
+//   privateKey
+// } = require("./config");
 
-const creds = require(`./${credentials}`);
 const rePluralPostfix = new RegExp(/_plural|_[\d]/g);
 const NOT_AVAILABLE_CELL = "_N/A";
 
 /**
  * getting started from https://theoephraim.github.io/node-google-spreadsheet
  */
-async function loadSpreadsheet() {
-  // eslint-disable-next-line no-console
+async function loadSpreadsheet(_config) {
+  const {
+    spreadSheetDocId,
+    sheetId,
+    clientEmail,
+    privateKey
+  } = _config;
+
   console.info(
     "\u001B[32m",
     "=====================================================================================================================\n",
@@ -29,15 +34,14 @@ async function loadSpreadsheet() {
     "\u001B[0m"
   );
 
+  const creds = require('./.credentials/toastcanvas-a4c2e5fb4c15.json')
   // spreadsheet key is the long id in the sheets URL
   const doc = new GoogleSpreadsheet(spreadSheetDocId);
 
   // load directly from json file if not in secure environment
-  await doc.useServiceAccountAuth({
-    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY,
-  });
+  await doc.useServiceAccountAuth(creds);
 
+  
   await doc.loadInfo(); // loads document properties and worksheets
 
   return doc;
@@ -47,7 +51,8 @@ function getPureKey(key = "") {
   return key.replace(rePluralPostfix, "");
 }
 
-const getColumnKeyToHeader = () => {
+const getColumnKeyToHeader = (_config) => {
+  const {getLanguageColumns, getLanguages} = _config;
   const header = { key: "키" };
   const columns = getLanguageColumns();
   getLanguages().map((lang, index) => (header[lang] = columns[index]));

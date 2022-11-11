@@ -5,7 +5,7 @@ const {
   projectPath,
   extensions,
   getDefaultLang,
-} = require("./config");
+} = require("./bin/cli");
 require("dotenv").config();
 
 const COMMON_EXTENSIONS = `/**/*.{${extensions

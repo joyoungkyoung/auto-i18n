@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "commander": "^9.4.1",
     "dotenv": "^16.0.3",
+    "figlet": "^1.5.2",
     "i18next": "^21.9.1",
     "mkdirp": "^1.0.4"
   },
