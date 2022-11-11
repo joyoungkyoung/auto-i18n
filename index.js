@@ -33,7 +33,10 @@ async function loadSpreadsheet() {
   const doc = new GoogleSpreadsheet(spreadSheetDocId);
 
   // load directly from json file if not in secure environment
-  await doc.useServiceAccountAuth(creds);
+  await doc.useServiceAccountAuth({
+    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    private_key: process.env.GOOGLE_PRIVATE_KEY,
+  });
 
   await doc.loadInfo(); // loads document properties and worksheets
 
