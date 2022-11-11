@@ -1,7 +1,12 @@
 // place in translate/download.js
-const fs = require('fs');
-const mkdirp = require('mkdirp');
-const {loadSpreadsheet, localesPath, ns, lngs, sheetId, columnKeyToHeader, NOT_AVAILABLE_CELL} = require('../index');
+const fs = require("fs");
+const mkdirp = require("mkdirp");
+const { resource, fileName, getLanguages, sheetId } = require("../config");
+const {
+  loadSpreadsheet,
+  NOT_AVAILABLE_CELL,
+  getColumnKeyToHeader,
+} = require("../index");
 
 /**
  * fetch translations from google spread sheet and transform to json
@@ -28,12 +33,13 @@ async function fetchTranslationsFromSheetToJson(doc) {
     return {};
   }
 
+  const columnKeyToHeader = getColumnKeyToHeader(); // 헤더별 컬럼정보
   const lngsMap = {};
   const rows = await sheet.getRows();
 
   rows.forEach((row) => {
     const key = row[columnKeyToHeader.key];
-    lngs.forEach((lng) => {
+    getLanguages().forEach((lng) => {
       const translation = row[columnKeyToHeader[lng]];
       // NOT_AVAILABLE_CELL("_N/A") means no related language
       if (translation === NOT_AVAILABLE_CELL) {
@@ -44,7 +50,7 @@ async function fetchTranslationsFromSheetToJson(doc) {
         lngsMap[lng] = {};
       }
 
-      lngsMap[lng][key] = translation || ''; // prevent to remove undefined value like ({"key": undefined})
+      lngsMap[lng][key] = translation || ""; // prevent to remove undefined value like ({"key": undefined})
     });
   });
 
@@ -54,43 +60,36 @@ async function fetchTranslationsFromSheetToJson(doc) {
 function checkAndMakeLocaleDir(dirPath, subDirs) {
   return new Promise((resolve, reject) => {
     subDirs.forEach((subDir, index) => {
-      mkdirp(`${dirPath}/${subDir}`).then(()=>{
-        if(index === subDirs.length -1) {
-          resolve();
-        }
-      }).catch(e => {
-        reject(e);
-      });
-      // mkdirp(`${dirPath}/${subDir}`, (err) => {
-      //   if (err) {
-      //     reject(err);
-      //   }
-
-      //   if (index === subDirs.length - 1) {
-      //     resolve();
-      //   }
-      // });
+      mkdirp(`${dirPath}/${subDir}`)
+        .then(() => {
+          if (index === subDirs.length - 1) {
+            resolve();
+          }
+        })
+        .catch((e) => {
+          reject(e);
+        });
     });
   });
 }
 
 async function updateJsonFromSheet() {
-  await checkAndMakeLocaleDir(localesPath, lngs);
+  await checkAndMakeLocaleDir(resource.loadPath, getLanguages());
 
   const doc = await loadSpreadsheet();
   const lngsMap = await fetchTranslationsFromSheetToJson(doc);
 
-  fs.readdir(localesPath, (error, lngs) => {
+  fs.readdir(resource.loadPath, (error, dirNames) => {
     if (error) {
       throw error;
     }
 
-    lngs.forEach((lng) => {
-      const localeJsonFilePath = `${localesPath}/${lng}/${ns}.json`;
+    dirNames.forEach((lng) => {
+      const localeJsonFilePath = `${resource.loadPath}/${lng}/${fileName}.json`;
 
       const jsonString = JSON.stringify(lngsMap[lng], null, 2);
 
-      fs.writeFile(localeJsonFilePath, jsonString, 'utf8', (err) => {
+      fs.writeFile(localeJsonFilePath, jsonString, "utf8", (err) => {
         if (err) {
           throw err;
         }
@@ -99,4 +98,5 @@ async function updateJsonFromSheet() {
   });
 }
 
+// run
 updateJsonFromSheet();

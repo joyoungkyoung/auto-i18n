@@ -1,23 +1,17 @@
 // place in translate/index.js
 require("dotenv").config();
 const { GoogleSpreadsheet } = require("google-spreadsheet");
-const creds = require("./.credentials/imgmonster-259707-a74defe2ddc4.json");
-const i18nextConfig = require("./i18next-scanner.config");
+const {
+  spreadSheetDocId,
+  sheetId,
+  credentials,
+  getLanguageColumns,
+  getLanguages,
+} = require("./config");
 
-const spreadsheetDocId = process.env.SPREAD_SHEET_DOC_ID;
-const ns = "translation";
-const lngs = i18nextConfig.options.lngs;
-const loadPath = i18nextConfig.options.resource.loadPath;
-const localesPath = loadPath.replace("/{{lng}}/{{ns}}.json", "");
+const creds = require(`./${credentials}`);
 const rePluralPostfix = new RegExp(/_plural|_[\d]/g);
-const sheetId = process.env.SHEET_ID; // your sheet id
 const NOT_AVAILABLE_CELL = "_N/A";
-const columnKeyToHeader = {
-  key: "키",
-  "ko-KR": "한글",
-  "en-US": "영어",
-  "vi-VN": "베트남어",
-};
 
 /**
  * getting started from https://theoephraim.github.io/node-google-spreadsheet
@@ -30,13 +24,13 @@ async function loadSpreadsheet() {
     "# i18next auto-sync using Spreadsheet\n\n",
     "  * Download translation resources from Spreadsheet and make /assets/locales/{{lng}}/{{ns}}.json\n",
     "  * Upload translation resources to Spreadsheet.\n\n",
-    `The Spreadsheet for translation is here (\u001B[34mhttps://docs.google.com/spreadsheets/d/${spreadsheetDocId}/#gid=${sheetId}\u001B[0m)\n`,
+    `The Spreadsheet for translation is here (\u001B[34mhttps://docs.google.com/spreadsheets/d/${spreadSheetDocId}/#gid=${sheetId}\u001B[0m)\n`,
     "=====================================================================================================================",
     "\u001B[0m"
   );
 
   // spreadsheet key is the long id in the sheets URL
-  const doc = new GoogleSpreadsheet(spreadsheetDocId);
+  const doc = new GoogleSpreadsheet(spreadSheetDocId);
 
   // load directly from json file if not in secure environment
   await doc.useServiceAccountAuth(creds);
@@ -50,13 +44,17 @@ function getPureKey(key = "") {
   return key.replace(rePluralPostfix, "");
 }
 
+const getColumnKeyToHeader = () => {
+  const header = { key: "키" };
+  const columns = getLanguageColumns();
+  getLanguages().map((lang, index) => (header[lang] = columns[index]));
+
+  return header;
+};
+
 module.exports = {
-  localesPath,
   loadSpreadsheet,
   getPureKey,
-  ns,
-  lngs,
-  sheetId,
-  columnKeyToHeader,
+  getColumnKeyToHeader,
   NOT_AVAILABLE_CELL,
 };

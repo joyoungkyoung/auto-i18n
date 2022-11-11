@@ -1,23 +1,38 @@
 const path = require("path");
+const {
+  resource,
+  getLanguages,
+  projectPath,
+  extensions,
+  getDefaultLang,
+} = require("./config");
 require("dotenv").config();
 
-const COMMON_EXTENSIONS = "/**/*.{js,jsx,ts,tsx,vue,html}";
+const COMMON_EXTENSIONS = `/**/*.{${extensions
+  .map((ext) => ext.slice(1))
+  .join(",")}}`;
 
 module.exports = {
-  input: [`${process.env.PROJECT_PATH}${COMMON_EXTENSIONS}`],
+  input: [`${projectPath}${COMMON_EXTENSIONS}`],
   options: {
-    defaultLng: "ko-KR",
-    lngs: ["ko-KR", "en-US", "vi-VN"],
+    defaultLng: getDefaultLang(),
+    lngs: getLanguages(),
     func: {
       list: ["i18next.t", "i18n.t", "$i18n.t"],
-      extensions: [".js", ".jsx", ".ts", ".tsx", ".vue", ".html"],
+      extensions: extensions,
     },
     resource: {
-      loadPath: path.join(__dirname, "assets/locales/{{lng}}/{{ns}}.json"),
-      savePath: path.join(__dirname, "assets/locales/{{lng}}/{{ns}}.json"),
+      loadPath: path.join(
+        __dirname,
+        resource.loadPath + "/{{lng}}/{{ns}}.json"
+      ),
+      savePath: path.join(
+        __dirname,
+        resource.savePath + "/{{lng}}/{{ns}}.json"
+      ),
     },
     defaultValue(lng, ns, key) {
-      const keyAsDefaultValue = ["ko-KR"];
+      const keyAsDefaultValue = [getDefaultLang()];
       if (keyAsDefaultValue.includes(lng)) {
         const separator = "~~";
         const value = key.includes(separator) ? key.split(separator)[1] : key;

@@ -1,17 +1,20 @@
 // place in translate/upload.js
 const fs = require("fs");
 const {
-  loadSpreadsheet,
-  localesPath,
-  getPureKey,
-  ns,
-  lngs,
+  getLanguages,
+  getLanguageColumns,
+  fileName,
+  resource,
   sheetId,
-  columnKeyToHeader,
+} = require("../config");
+const {
+  loadSpreadsheet,
+  getPureKey,
   NOT_AVAILABLE_CELL,
+  getColumnKeyToHeader,
 } = require("../index");
 
-const headerValues = ["키", "한글", "영어", "베트남어"];
+const headerValues = ["키", ...getLanguageColumns()];
 
 async function addNewSheet(doc, title, sheetId) {
   const sheet = await doc.addSheet({
@@ -23,6 +26,11 @@ async function addNewSheet(doc, title, sheetId) {
   return sheet;
 }
 
+/**
+ * 스프레드 시트 업데이트
+ * @param {*} doc 스프레드 시트 객체
+ * @param {*} keyMap json파일 키맵
+ */
 async function updateTranslationsFromKeyMapToSheet(doc, keyMap) {
   const title = `i18n`; // 스프레드 시트 내 시트명
   let sheet = doc.sheetsById[sheetId];
@@ -30,20 +38,22 @@ async function updateTranslationsFromKeyMapToSheet(doc, keyMap) {
     sheet = await addNewSheet(doc, title, sheetId);
   }
 
-  const rows = await sheet.getRows();
+  const columnKeyToHeader = getColumnKeyToHeader(); // 헤더별 컬럼정보
+  const existKeys = {}; // 기존에 업로드 된 데이터
+  const addedRows = []; // 신규 추가할 데이터
 
   // find exsit keys
-  const exsitKeys = {};
-  const addedRows = [];
+  const rows = await sheet.getRows();
   rows.forEach((row) => {
     const key = row[columnKeyToHeader.key];
     if (keyMap[key]) {
-      exsitKeys[key] = true;
+      existKeys[key] = true;
     }
   });
 
+  // existKeys 목록에 없는 데이터 신규추가
   for (const [key, translations] of Object.entries(keyMap)) {
-    if (!exsitKeys[key]) {
+    if (!existKeys[key]) {
       const row = {
         [columnKeyToHeader.key]: key,
         ...Object.keys(translations).reduce((result, lng) => {
@@ -86,7 +96,7 @@ function gatherKeyMap(keyMap, lng, json) {
 
     const keyMapWithLng = keyMap[key];
     if (!keyMapWithLng[keyWithPostfix]) {
-      keyMapWithLng[keyWithPostfix] = lngs.reduce((initObj, lng) => {
+      keyMapWithLng[keyWithPostfix] = getLanguages().reduce((initObj, lng) => {
         initObj[lng] = NOT_AVAILABLE_CELL;
 
         return initObj;
@@ -100,17 +110,17 @@ function gatherKeyMap(keyMap, lng, json) {
 async function updateSheetFromJson() {
   const doc = await loadSpreadsheet();
 
-  fs.readdir(localesPath, (error, lngs) => {
+  // 파일 목록 불러오기
+  fs.readdir(resource.loadPath, (error, dirNames) => {
     if (error) {
       throw error;
     }
 
     const keyMap = {};
 
-    lngs.forEach((lng) => {
-      const localeJsonFilePath = `${localesPath}/${lng}/${ns}.json`;
+    dirNames.forEach((lng) => {
+      const localeJsonFilePath = `${resource.loadPath}/${lng}/${fileName}.json`;
 
-      // eslint-disable-next-line no-sync
       const json = fs.readFileSync(localeJsonFilePath, "utf8");
 
       gatherKeyMap(keyMap, lng, JSON.parse(json));
@@ -120,4 +130,5 @@ async function updateSheetFromJson() {
   });
 }
 
+// run
 updateSheetFromJson();
