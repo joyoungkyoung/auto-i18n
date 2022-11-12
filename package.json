@@ -1,7 +1,24 @@
 {
-  "name": "i18n-management",
+  "name": "@joyk/i18n",
   "version": "0.1.0",
-  "private": true,
+  "description": "i18n auto sync project",
+  "author": "joyoungkyoung",
+  "bin": {
+    "joyk-i18n": "./bin/cli.js"
+  },
+  "main": "index.js",
+  "files": [
+    "bin",
+    "translate",
+    "index.js"
+  ],
+  "keywords": [
+    "i18n"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joyoungkyoung/auto-i18n.git"
+  },
   "dependencies": {
     "commander": "^9.4.1",
     "dotenv": "^16.0.3",

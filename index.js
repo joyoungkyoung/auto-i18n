@@ -1,14 +1,6 @@
 require("dotenv").config();
-const path = require('path')
+const path = require("path");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
-// const {
-//   spreadSheetDocId,
-//   sheetId,
-//   getLanguageColumns,
-//   getLanguages,
-//   clientEmail,
-//   privateKey
-// } = require("./config");
 
 const rePluralPostfix = new RegExp(/_plural|_[\d]/g);
 const NOT_AVAILABLE_CELL = "_N/A";
@@ -17,11 +9,7 @@ const NOT_AVAILABLE_CELL = "_N/A";
  * getting started from https://theoephraim.github.io/node-google-spreadsheet
  */
 async function loadSpreadsheet(_config) {
-  const {
-    spreadSheetDocId,
-    sheetId,
-    credentials
-  } = _config;
+  const { spreadSheetDocId, sheetId, credentials } = _config;
 
   console.info(
     "\u001B[32m",
@@ -34,14 +22,13 @@ async function loadSpreadsheet(_config) {
     "\u001B[0m"
   );
 
-  const creds = require(path.join(process.cwd(), credentials))
+  const creds = require(path.join(process.cwd(), credentials));
   // spreadsheet key is the long id in the sheets URL
   const doc = new GoogleSpreadsheet(spreadSheetDocId);
 
   // load directly from json file if not in secure environment
   await doc.useServiceAccountAuth(creds);
 
-  
   await doc.loadInfo(); // loads document properties and worksheets
 
   return doc;
@@ -52,8 +39,8 @@ function getPureKey(key = "") {
 }
 
 const getColumnKeyToHeader = (_config) => {
-  const {getLanguageColumns, getLanguages} = _config;
-  const header = { key: "키" };
+  const { getLanguageColumns, getLanguages } = _config;
+  const header = { key: "Key" };
   const columns = getLanguageColumns();
   getLanguages().map((lang, index) => (header[lang] = columns[index]));
 

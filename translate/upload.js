@@ -1,12 +1,6 @@
 const fs = require("fs");
-const path = require('path')
-// const {
-//   getLanguages,
-//   getLanguageColumns,
-//   fileName,
-//   resource,
-//   sheetId,
-// } = require("../config");
+const path = require("path");
+
 const {
   loadSpreadsheet,
   getPureKey,
@@ -14,11 +8,9 @@ const {
   getColumnKeyToHeader,
 } = require("../index");
 
-
-
 async function addNewSheet(doc, title, _config) {
-  const {sheetId, getLanguageColumns} = _config;
-  const headerValues = ["키", ...getLanguageColumns()];
+  const { sheetId, getLanguageColumns } = _config;
+  const headerValues = ["Key", ...getLanguageColumns()];
   const sheet = await doc.addSheet({
     sheetId,
     title,
@@ -29,21 +21,21 @@ async function addNewSheet(doc, title, _config) {
 }
 
 /**
- * 스프레드 시트 업데이트
- * @param {*} doc 스프레드 시트 객체
- * @param {*} keyMap json파일 키맵
+ * Update spreadsheet
+ * @param {*} doc Spreadsheet Object
+ * @param {*} keyMap json file keymap
  */
 async function updateTranslationsFromKeyMapToSheet(doc, keyMap, _config) {
-  const {sheetId} = _config;
-  const title = `i18n`; // 스프레드 시트 내 시트명
+  const { sheetId } = _config;
+  const title = `i18n`; // Sheet name in spreadsheet
   let sheet = doc.sheetsById[sheetId];
   if (!sheet) {
     sheet = await addNewSheet(doc, title, _config);
   }
 
-  const columnKeyToHeader = getColumnKeyToHeader(_config); // 헤더별 컬럼정보
-  const existKeys = {}; // 기존에 업로드 된 데이터
-  const addedRows = []; // 신규 추가할 데이터
+  const columnKeyToHeader = getColumnKeyToHeader(_config);
+  const existKeys = {};
+  const addedRows = [];
 
   // find exsit keys
   const rows = await sheet.getRows();
@@ -54,7 +46,7 @@ async function updateTranslationsFromKeyMapToSheet(doc, keyMap, _config) {
     }
   });
 
-  // existKeys 목록에 없는 데이터 신규추가
+  // Add new data that is not in the expistKeys list
   for (const [key, translations] of Object.entries(keyMap)) {
     if (!existKeys[key]) {
       const row = {
@@ -110,11 +102,12 @@ function gatherKeyMap(keyMap, lng, json, languages) {
   }
 }
 
+// start
 exports.updateSheetFromJson = async (_config) => {
-  const {resource, fileName, getLanguages, sheetId} = _config
+  const { resource, fileName, getLanguages } = _config;
   const doc = await loadSpreadsheet(_config);
-  const loadPath = path.join(process.cwd(), resource.loadPath)
-  // 파일 목록 불러오기
+  const loadPath = path.join(process.cwd(), resource.loadPath);
+
   fs.readdir(loadPath, (error, dirNames) => {
     if (error) {
       throw error;
@@ -122,7 +115,6 @@ exports.updateSheetFromJson = async (_config) => {
 
     const keyMap = {};
 
-   
     dirNames.forEach((lng) => {
       const localeJsonFilePath = `${loadPath}/${lng}/${fileName}.json`;
 
@@ -133,7 +125,4 @@ exports.updateSheetFromJson = async (_config) => {
 
     updateTranslationsFromKeyMapToSheet(doc, toJson(keyMap), _config);
   });
-}
-
-// run
-// updateSheetFromJson();
+};

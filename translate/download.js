@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const mkdirp = require("mkdirp");
-// const { resource, fileName, getLanguages, sheetId } = require("../config");
+
 const {
   loadSpreadsheet,
   NOT_AVAILABLE_CELL,
@@ -28,13 +28,13 @@ const {
  * }
  */
 async function fetchTranslationsFromSheetToJson(doc, _config) {
-  const {getLanguages, sheetId} = _config;
+  const { getLanguages, sheetId } = _config;
   const sheet = doc.sheetsById[sheetId];
   if (!sheet) {
     return {};
   }
 
-  const columnKeyToHeader = getColumnKeyToHeader(_config); // 헤더별 컬럼정보
+  const columnKeyToHeader = getColumnKeyToHeader(_config); // column information by header
   const lngsMap = {};
   const rows = await sheet.getRows();
 
@@ -74,9 +74,10 @@ function checkAndMakeLocaleDir(dirPath, subDirs) {
   });
 }
 
+// start
 exports.updateJsonFromSheet = async (_config) => {
-  const {resource, fileName, getLanguages} = _config
-  const loadPath = path.join(process.cwd(), resource.loadPath)
+  const { resource, fileName, getLanguages } = _config;
+  const loadPath = path.join(process.cwd(), resource.loadPath);
   const languages = getLanguages();
 
   await checkAndMakeLocaleDir(loadPath, languages);
@@ -101,7 +102,4 @@ exports.updateJsonFromSheet = async (_config) => {
       });
     });
   });
-}
-
-// run
-// updateJsonFromSheet();
+};
