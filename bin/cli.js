@@ -55,5 +55,9 @@ if (option.download) {
   scanStart(_config);
 } else if (option.upload) {
   console.info("스캔한 국제화 파일을 구글 스프레드 시트로 업로드합니다.");
+  console.info("업로드 전 선행: ");
+  console.info("스캔 대상 : ", _config.projectPath);
+  scanStart(_config);
+  console.info("업로드 진행 중...");
   updateSheetFromJson(_config);
 }
