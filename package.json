@@ -1,6 +1,6 @@
 {
   "name": "@joyk/i18n",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "description": "i18n auto sync project",
   "author": "joyoungkyoung",
   "bin": {
@@ -15,24 +15,22 @@
   "keywords": [
     "i18n"
   ],
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/joyoungkyoung/auto-i18n.git"
   },
   "dependencies": {
     "commander": "^9.4.1",
-    "dotenv": "^16.0.3",
     "figlet": "^1.5.2",
+    "google-spreadsheet": "^3.3.0",
     "i18next": "^21.9.1",
+    "i18next-scanner": "^4.1.0",
     "mkdirp": "^1.0.4"
   },
   "scripts": {
     "scan:i18n": "i18next-scanner --config i18next-scanner.config.js",
     "upload:i18n": "npm run scan:i18n && node translate/upload.js",
     "download:i18n": "node translate/download.js"
-  },
-  "devDependencies": {
-    "google-spreadsheet": "^3.3.0",
-    "i18next-scanner": "^4.0.0"
   }
 }

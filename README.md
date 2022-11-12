@@ -50,8 +50,6 @@ CREDENTIALS = 서비스계정 인증 키파일 경로
 ```
 // 기본 형태
 
-require("dotenv").config();
-
 const projectPath = process.env.PROJECT_PATH; // 스캔 대상의 경로
 const spreadSheetDocId = process.env.SPREAD_SHEET_DOC_ID;
 const sheetId = process.env.SHEET_ID;

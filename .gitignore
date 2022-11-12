@@ -1,10 +1,2 @@
-# locale json files
-/assets/locales/
-
-# credentials
-/.credentials
-
 # node_modules
 /node_modules
-
-.env

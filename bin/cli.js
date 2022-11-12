@@ -18,9 +18,11 @@ program.on("--help", () => {
   console.log("");
   console.log("Examples:");
   console.log("");
-  console.log("   $ @joyk/i18n --config auto-i18n.config.js --download");
-  console.log("   $ @joyk/i18n --config auto-i18n.config.js --scan");
-  console.log("   $ @joyk/i18n --config auto-i18n.config.js --upload");
+  console.log(
+    `   $ ${packageJson.name} --config auto-i18n.config.js --download`
+  );
+  console.log(`   $ ${packageJson.name} --config auto-i18n.config.js --scan`);
+  console.log(`   $ ${packageJson.name} --config auto-i18n.config.js --upload`);
   console.log("");
 });
 
@@ -38,7 +40,7 @@ let _config = {};
 try {
   _config = require(path.resolve(program.opts().config));
 } catch (err) {
-  console.error("@joyk/i18n:", err);
+  console.error(packageJson.name, ": ", err);
   process.exit(1);
 }
 
